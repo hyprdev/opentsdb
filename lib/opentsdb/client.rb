@@ -3,12 +3,14 @@ module Opentsdb
     attr_reader :host
     attr_reader :port
     attr_accessor :type
+    attr_accessor :timezone
 
     def initialize options = {}
       @faraday = Faraday.new
       self.host = options['host'] || Opentsdb.host
       self.port = options['port'] || Opentsdb.port
       self.type = options['type'] || Opentsdb.type
+      self.timezone = options['timezone'] || Opentsdb.timezone
     end
 
     def host= host
@@ -73,8 +75,9 @@ module Opentsdb
   private
     # Send request to REST interface of database
     def request url, type = :get, data = nil
+      query_parameters = [@type, "tz=#{self.timezone}"]
       uri = URI.parse url
-      uri.query = [@type, uri.query].compact.join('&')
+      uri.query = [query_parameters, uri.query].compact.join('&')
 
       response = @faraday.send(type, uri.to_s) do |req|
         req.headers['Content-Type'] = 'application/json'

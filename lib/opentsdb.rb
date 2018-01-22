@@ -3,6 +3,7 @@ module Opentsdb
     attr_writer :host
     attr_writer :port
     attr_writer :type
+    attr_writer :timezone
     attr_writer :executable_path
 
     def configure
@@ -19,6 +20,10 @@ module Opentsdb
 
     def type
       @type || 'details'
+    end
+
+    def timezone
+      @timezone || 'UTC'
     end
 
     def executable_path
