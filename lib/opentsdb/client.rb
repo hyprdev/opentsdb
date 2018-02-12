@@ -78,27 +78,35 @@ module Opentsdb
       query_parameters = [@type, "tz=#{self.timezone}"]
       uri = URI.parse url
       uri.query = [query_parameters, uri.query].compact.join('&')
+      error = nil
 
       response = @faraday.send(type, uri.to_s) do |req|
         req.headers['Content-Type'] = 'application/json'
         req.body = JSON.generate(data) if data
       end
 
-      if !response.success?
-        response_content = JSON.parse(response.body) if !response.body.nil? && !response.body.empty?
-        error = response_content['error']
+      begin
+        response_content = JSON.parse(response.body.to_s)
+      rescue JSON::ParserError
+        response_content = {}
+      end
 
-        # Error while processing request
-        if error
+      unless response.success?
+        # Regular error
+        if response_content.has_key?("error")
+          error = response_content['error']
           message = error['details'] || error['message']
-          raise ApiError, message, error['trace']
+          matches = message.match(/No such name for '([^']+)':\s+'([^']+)'/)
 
-        # Error while creating uid or storing data
-        else
-          response_content = JSON.parse(response.body) if !response.body.nil? && !response.body.empty?
+          # Got an error about not existing UID
+          if matches.captures.size > 0
+            uid_type = matches[1].singularize.camelize
+            exception_class = "Opentsdb::#{uid_type}NotExistsError".constantize
+            raise exception_class, message, error['trace']
+          end
+
+          raise ApiError, message, error['trace']
         end
-      else
-        response_content = JSON.parse(response.body) if !response.body.nil? && !response.body.empty?
       end
 
       response_content
