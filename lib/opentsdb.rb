@@ -4,6 +4,7 @@ module Opentsdb
     attr_writer :port
     attr_writer :type
     attr_writer :timezone
+    attr_writer :logger
     attr_writer :executable_path
 
     def configure
@@ -28,6 +29,10 @@ module Opentsdb
 
     def executable_path
       @executable_path || 'tsdb'
+    end
+
+    def logger
+      @logger || nil
     end
   end
 end

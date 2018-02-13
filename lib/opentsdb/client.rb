@@ -4,6 +4,7 @@ module Opentsdb
     attr_reader :port
     attr_accessor :type
     attr_accessor :timezone
+    attr_accessor :logger
 
     def initialize options = {}
       @faraday = Faraday.new
@@ -11,6 +12,7 @@ module Opentsdb
       self.port = options['port'] || Opentsdb.port
       self.type = options['type'] || Opentsdb.type
       self.timezone = options['timezone'] || Opentsdb.timezone
+      self.logger = options['logger'] || Opentsdb.logger
     end
 
     def host= host
@@ -79,10 +81,18 @@ module Opentsdb
       uri = URI.parse url
       uri.query = [query_parameters, uri.query].compact.join('&')
       error = nil
+      start_time = Time.now
 
       response = @faraday.send(type, uri.to_s) do |req|
         req.headers['Content-Type'] = 'application/json'
         req.body = JSON.generate(data) if data
+      end
+      finish_time = Time.now
+      method_name = caller[0][/`.*'/][1..-2]
+      unless logger.nil?
+        duration = (finish_time - start_time).in_milliseconds
+        duration = BigDecimal.new(duration, 3)
+        logger.debug(:opentsdb) {"(#{duration}ms) method: #{method_name} data: #{data}"}
       end
 
       begin
