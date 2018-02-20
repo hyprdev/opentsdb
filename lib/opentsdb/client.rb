@@ -109,7 +109,7 @@ module Opentsdb
           matches = message.match(/No such name for '([^']+)':\s+'([^']+)'/)
 
           # Got an error about not existing UID
-          if matches.captures.size > 0
+          unless matches.nil? || matches.captures.empty?
             uid_type = matches[1].singularize.camelize
             exception_class = "Opentsdb::#{uid_type}NotExistsError".constantize
             raise exception_class, message, error['trace']
