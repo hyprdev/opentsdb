@@ -1,9 +1,9 @@
-# Opentsdb
+# OpenTSDB
 
-Opentsdb is Ruby adapter to access time series database using it's REST API.
+OpenTSDB is Ruby adapter to access time series database using it's REST API.
 
 ## Basic usage
-You can connect to Opentsdb simply by writing
+You can connect to OpenTSDB simply by writing
 ```ruby
 require 'opentsdb'
 
