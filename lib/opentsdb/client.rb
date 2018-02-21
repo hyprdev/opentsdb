@@ -6,13 +6,23 @@ module Opentsdb
     attr_accessor :timezone
     attr_accessor :logger
 
+    # Create a new client instance
+    #
+    # @param [Hash] options
+    # @option options [String] :host ("127.0.0.1") server hostname
+    # @option options [Fixnum] :port (4242) server port
+    # @option options [String] :type (details) response type for queries
+    # @option options [String] :timezone (UTC) timezone used in queries
+    # @option options [Logger] :logger (nil) logger
+    #
+    # @return Opentsdb::Client
     def initialize options = {}
       @faraday = Faraday.new
-      self.host = options['host'] || Opentsdb.host
-      self.port = options['port'] || Opentsdb.port
-      self.type = options['type'] || Opentsdb.type
-      self.timezone = options['timezone'] || Opentsdb.timezone
-      self.logger = options['logger'] || Opentsdb.logger
+      self.host = options[:host] || Opentsdb.host
+      self.port = options[:port] || Opentsdb.port
+      self.type = options[:type] || Opentsdb.type
+      self.timezone = options[:timezone] || Opentsdb.timezone
+      self.logger = options[:logger] || Opentsdb.logger
     end
 
     def host= host
@@ -25,6 +35,7 @@ module Opentsdb
       @faraday.port = port
     end
 
+    # Drop database caches
     def drop_caches
       request '/api/dropcaches', :get
     end
