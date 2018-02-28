@@ -17,7 +17,9 @@ module Opentsdb
     #
     # @return Opentsdb::Client
     def initialize options = {}
-      @faraday = Faraday.new
+      @faraday = Faraday.new do |conn|
+        conn.adapter :httpclient
+      end
       self.host = options[:host] || Opentsdb.host
       self.port = options[:port] || Opentsdb.port
       self.type = options[:type] || Opentsdb.type
